@@ -42,29 +42,22 @@ This project builds a machine learning model to predict the likelihood of heart 
 
 ---
 
-## 📂 Project Structure
+📌 Prerequisites
 
-```text
-Heart-Disease-Prediction-Model/
-│── data/
-│   ├── raw/
-│   └── processed/
-│
-│── notebooks/
-│   ├── eda.ipynb
-│   └── experiments.ipynb
-│
-│── src/
-│   ├── preprocessing.py
-│   ├── train.py
-│   ├── evaluate.py
-│   └── utils.py
-│
-│── models/
-│   └── best_model.pkl
-│
-│── app/
-│   └── streamlit_app.py
-│
-│── requirements.txt
-│── README.md
+Install the following tools first:
+
+Python 3.10+
+Git
+Visual Studio Code (recommended)
+
+Also create a GitHub account and accept the repository invitation.
+
+📥 Step 1: Clone the Repository
+
+Open terminal / PowerShell and run:
+
+git clone https://github.com/YoussefTaha39/Heart-Disease-Prediction-Model.git
+
+This downloads the project folder to your computer.
+# 📂 Step 2: Working time 
+## When ever you start working make sure to insert git pull in your terminal and make sure to work in dev branch 
