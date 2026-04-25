@@ -41,7 +41,7 @@ The goal is to assist in **early detection and decision-making** using data-driv
 
 * Logistic Regression
 * Decision Tree
-* Random Forest ⭐ *(Best performing model)*
+* Random Forest ⭐
 
 ---
 
