@@ -112,11 +112,3 @@ git push origin dev
 ```
 
 ---
-
-## 📊 Project Status
-
-🚧 Currently in development
-📌 Model improvements and UI enhancements in progress
-
----
-
