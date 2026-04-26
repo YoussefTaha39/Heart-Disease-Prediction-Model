@@ -1,8 +1,4 @@
-Alright this is already solid 👀🔥 — let’s clean it up, tighten the structure, and make it look like a **professional GitHub README that screams “we know what we’re doing”** while still being easy for your team.
 
-Here’s the upgraded version:
-
----
 
 # ❤️ Heart Disease Prediction Model
 
