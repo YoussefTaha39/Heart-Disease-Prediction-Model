@@ -111,7 +111,7 @@ lr_grid = GridSearchCV(
 lr_grid.fit(X_train, y_train)
 print(f"\nBest LR params : {lr_grid.best_params_}")
 # ==============================
-# 11. Decision Tree + Tuning
+# 11. Decision Tree 
 # ==============================
 dt_params = {
     'max_depth'       : [3, 5, 7, 10, None],
@@ -131,7 +131,7 @@ dt_model, dt_metrics = evaluate(
 )
 
 # ==============================
-# 12. Random Forest + Tuning
+# 12. Random Forest 
 # ==============================
 rf_params = {
     'n_estimators'    : [100, 200, 300],
@@ -165,21 +165,3 @@ xgb_grid = GridSearchCV(
 )
 xgb_grid.fit(X_train, y_train)
 print(f"\nBest XGB params: {xgb_grid.best_params_}")
-
-# ==============================
-# 14. Model Comparison
-# ==============================
-
-
-# ==============================
-# 16. Feature Importance (RF / XGB)
-# ==============================
-def plot_feature_importance(model, feature_names, title):
-    importances = pd.Series(model.feature_importances_, index=feature_names).sort_values(ascending=False)
-    plt.figure(figsize=(10, 5))
-    importances.plot(kind='bar', color='steelblue', edgecolor='black')
-    plt.title(title, fontweight='bold')
-    plt.ylabel("Importance")
-    plt.tight_layout()
-    plt.show()
-
