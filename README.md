@@ -1,4 +1,4 @@
-````md
+
 # ❤️ Heart Disease Prediction Model
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue)
@@ -73,7 +73,7 @@ Before starting, ensure you have the following installed:
 ```bash
 git clone https://github.com/YoussefTaha39/Heart-Disease-Prediction-Model.git
 cd Heart-Disease-Prediction-Model
-````
+
 
 ### 2️⃣ Install Dependencies
 
