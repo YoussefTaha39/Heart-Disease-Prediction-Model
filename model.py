@@ -1,169 +1,167 @@
-# Import Libraries
+# ==============================
+# 1. Import Libraries
+# ==============================
 import pandas as pd
+import matplotlib.pyplot as plt
+import pickle
+import numpy as np
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+from sklearn.utils import class_weight
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score,
+    f1_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
+)
 
-# Load Dataset
-df = pd.read_csv('/kaggle/input/competitions/playground-series-s6e2/train.csv')
-
-# Display first rows
-print(df.head())
-
-# Check dataset information
-print(df.info())
-print(df.isnull().sum())
-
-# Remove unnecessary column
-df = df.drop(columns=['id'])
-
-# Encode target column
-df['Heart Disease'] = df['Heart Disease'].map({
-    'Absence': 0,
-    'Presence': 1
-})
-
-# Separate features and target
-X = df.drop('Heart Disease', axis=1)
-y = df['Heart Disease']
-
-# Apply Feature Scaling
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-
-# Convert scaled data to DataFrame
-X_scaled = pd.DataFrame(X_scaled, columns=X.columns)
-
-# Combine features with target
-clean_df = X_scaled
-clean_df['Heart Disease'] = y
-
-# Save cleaned dataset
-clean_df.to_csv("clean_dataset.csv", index=False)
-
-# Display final dataset
-print(clean_df.head())
 
 # ==============================
-# 14. Function Evaluation
+# 2. Load Data
 # ==============================
+train_df = pd.read_csv("/Users/kevinharvey/Desktop/Projects/ML Project/Heart-Disease-Prediction-Model/data/train.csv")
+test_df  = pd.read_csv("/Users/kevinharvey/Desktop/Projects/ML Project/Heart-Disease-Prediction-Model/data/test.csv")
 
-def evaluate_model(name, model, X_train, y_train, X_val, y_val):
-    # Train
-    model.fit(X_train, y_train)
-
-    # Predictions
-    y_train_pred = model.predict(X_train)
-    y_val_pred = model.predict(X_val)
-
-    # Metrics
-    train_acc = accuracy_score(y_train, y_train_pred)
-    val_acc = accuracy_score(y_val, y_val_pred)
-    precision = precision_score(y_val, y_val_pred)
-    recall = recall_score(y_val, y_val_pred)
-    f1 = f1_score(y_val, y_val_pred)
-
-    print(f"\n{name}")
-    print("Train Accuracy:", train_acc)
-    print("Validation Accuracy:", val_acc)
-    print("Precision:", precision)
-    print("Recall:", recall)
-    print("F1 Score:", f1)
-
-    # Overfitting Check
-    print("Overfitting Difference:", abs(train_acc - val_acc))
-
-    # Confusion Matrix
-    cm = confusion_matrix(y_val, y_val_pred)
-    print("Confusion Matrix:\n", cm)
-
-    # Visual Confusion Matrix
-    ConfusionMatrixDisplay.from_predictions(y_val, y_val_pred)
-    plt.title(name)
-    plt.show()
-
-    # Classification Report
-    print("\nClassification Report:\n", classification_report(y_val, y_val_pred))
-
-    return {
-        "Model": name,
-        "Train Acc": train_acc,
-        "Val Acc": val_acc,
-        "Precision": precision,
-        "Recall": recall,
-        "F1": f1
-    }
+print("Shape of training data:", train_df.shape)
+print("Shape of test data    :", test_df.shape)
+print("\nTraining Columns:\n", train_df.columns.tolist())
 
 # ==============================
-# Evaluate Logistic Regression 
+# 3. Data Cleaning
 # ==============================
+for df in [train_df, test_df]:
+    if 'id' in df.columns:
+        df.drop(columns=['id'], inplace=True)
 
-lr_metrics = evaluate_model(
-    "Logistic Regression",
-    lr_grid.best_estimator_,
+print("\nMissing Values — Training:\n", train_df.isnull().sum())
+print("\nMissing Values — Test:\n",     test_df.isnull().sum())
+
+num_cols = ['Age', 'BP', 'Cholesterol', 'Max HR', 'ST depression']
+cat_cols = ['Sex', 'Chest pain type', 'FBS over 120', 'EKG results',
+            'Exercise angina', 'Slope of ST', 'Number of vessels fluro', 'Thallium']
+
+for col in num_cols:
+    median_val = train_df[col].median()
+    train_df[col].fillna(median_val, inplace=True)
+    test_df[col].fillna(median_val, inplace=True)
+
+for col in cat_cols:
+    mode_val = train_df[col].mode()[0]
+    train_df[col].fillna(mode_val, inplace=True)
+    test_df[col].fillna(mode_val, inplace=True)
+
+# ==============================
+# 4. Target Encoding
+# ==============================
+train_df['Heart Disease'] = train_df['Heart Disease'].map({'Absence': 0, 'Presence': 1})
+
+print("\nTarget Distribution:\n", train_df['Heart Disease'].value_counts())
+
+# ==============================
+# 5. Class Imbalance Check
+# ==============================
+counts = train_df['Heart Disease'].value_counts()
+ratio  = counts.min() / counts.max()
+print(f"\nClass balance ratio: {ratio:.2f}  ({'balanced ✅' if ratio > 0.7 else 'imbalanced ⚠️  — applying class_weight=balanced'})")
+
+use_class_weight = 'balanced' if ratio <= 0.7 else None
+
+# ==============================
+# 6. Feature Scaling
+# ==============================
+X = train_df.drop('Heart Disease', axis=1)
+y = train_df['Heart Disease']
+
+scaler  = StandardScaler()
+X_scaled = pd.DataFrame(scaler.fit_transform(X), columns=X.columns)
+
+# ==============================
+# 7. Correlation & Top Features
+# ==============================
+corr_df = X_scaled.copy()
+corr_df['Heart Disease'] = y.values
+corr = corr_df.corr()
+
+top_features = corr['Heart Disease'].abs().sort_values(ascending=False)[1:6]
+print("\nTop 5 Correlated Features:\n", top_features)
+
+# ==============================
+# 8. Train / Validation Split
+# ==============================
+X_train, X_val, y_train, y_val = train_test_split(
+    X_scaled, y, test_size=0.2, random_state=42, stratify=y
+)
+print(f"\nTrain size: {X_train.shape[0]}  |  Val size: {X_val.shape[0]}")
+
+
+# ==============================
+# 10. Logistic Regression
+# ==============================
+lr_params = {
+    'C'      : [0.01, 0.1, 1, 10, 100],
+    'solver' : ['lbfgs', 'liblinear'],
+    'penalty': ['l2'],
+}
+lr_grid = GridSearchCV(
+    LogisticRegression(max_iter=1000, class_weight=use_class_weight, random_state=42),
+    lr_params, cv=5, scoring='accuracy', n_jobs=-1
+)
+lr_grid.fit(X_train, y_train)
+print(f"\nBest LR params : {lr_grid.best_params_}")
+# ==============================
+# 11. Decision Tree 
+# ==============================
+dt_params = {
+    'max_depth'       : [3, 5, 7, 10, None],
+    'min_samples_split': [2, 5, 10, 20],
+    'min_samples_leaf' : [1, 3, 5, 10],
+    'criterion'        : ['gini', 'entropy'],
+}
+dt_grid = GridSearchCV(
+    DecisionTreeClassifier(class_weight=use_class_weight, random_state=42),
+    dt_params, cv=5, scoring='accuracy', n_jobs=-1
+)
+dt_grid.fit(X_train, y_train)
+print(f"\nBest DT params : {dt_grid.best_params_}")
+dt_model, dt_metrics = evaluate(
+    "Decision Tree (Tuned)", dt_grid.best_estimator_,
     X_train, y_train, X_val, y_val
 )
 
 # ==============================
-# Evaluate Decision Tree
+# 12. Random Forest 
 # ==============================
-
-dt_metrics = evaluate_model(
-    "Decision Tree",
-    dt_grid.best_estimator_,
-    X_train, y_train, X_val, y_val
+rf_params = {
+    'n_estimators'    : [100, 200, 300],
+    'max_depth'       : [None, 5, 10, 15],
+    'min_samples_split': [2, 5, 10],
+    'max_features'    : ['sqrt', 'log2'],
+}
+rf_grid = GridSearchCV(
+    RandomForestClassifier(class_weight=use_class_weight, random_state=42),
+    rf_params, cv=5, scoring='accuracy', n_jobs=-1
 )
+rf_grid.fit(X_train, y_train)
+print(f"\nBest RF params : {rf_grid.best_params_}")
+
 
 # ==============================
-# Evaluate Random Forest
+# 13. XGBoost 
 # ==============================
 
-rf_metrics = evaluate_model(
-    "Random Forest",
-    rf_grid.best_estimator_,
-    X_train, y_train, X_val, y_val
+xgb_params = {
+    'n_estimators'  : [100, 200, 300],
+    'learning_rate' : [0.01, 0.05, 0.1],
+    'max_depth'     : [3, 5, 7],
+    'subsample'     : [0.8, 1.0],
+}
+scale_pos = (y_train == 0).sum() / (y_train == 1).sum()
+xgb_grid = GridSearchCV(
+    XGBClassifier(random_state=42, eval_metric='logloss',
+                  scale_pos_weight=scale_pos if use_class_weight else 1),
+    xgb_params, cv=5, scoring='accuracy', n_jobs=-1
 )
-
-# ==============================
-# Evaluate XGBoost
-# ==============================
-
-xgb_metrics = evaluate_model(
-    "XGBoost",
-    xgb_grid.best_estimator_,
-    X_train, y_train, X_val, y_val
-)
-
-# ==============================
-# 15. Compare Models
-# ==============================
-
-results = pd.DataFrame([lr_metrics, dt_metrics, rf_metrics, xgb_metrics])
-print("\nModel Comparison:\n")
-print(results)
-
-# ==============================
-# 16. Choose Best Model
-# ==============================
-
-best_model = results.sort_values(by="Recall", ascending=False).iloc[0]
-print("\nBest Model:\n", best_model)
-
-# ==============================
-# 17. Test on New Data
-# ==============================
-
-sample = X_val.iloc[0:1]
-
-best_model_name = best_model["Model"]
-
-if best_model_name == "Logistic Regression":
-    final_model = lr_grid.best_estimator_
-elif best_model_name == "Decision Tree":
-    final_model = dt_grid.best_estimator_
-elif best_model_name == "Random Forest":
-    final_model = rf_grid.best_estimator_
-else:
-    final_model = xgb_grid.best_estimator_
-
-prediction = final_model.predict(sample)
-
-print("\nTest Sample Prediction:", prediction) 
+xgb_grid.fit(X_train, y_train)
+print(f"\nBest XGB params: {xgb_grid.best_params_}")
