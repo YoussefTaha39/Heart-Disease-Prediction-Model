@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CardioCare — Recommendations</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="header-container">
+      <a href="/" class="logo"><span>❤️</span> CardioCare</a>
+      <nav>
+        <a href="/">Predict</a>
+        <a href="/#history">History</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="rec-container">
+
+    <!-- ====== RISK BANNER ====== -->
+    {% if level == "low" %}
+    <div class="risk-banner risk-low">
+      <div class="risk-icon">&#128154;</div>
+      <h1>Low Risk</h1>
+      <p class="risk-probability">Probability: {{ "%.1f"|format(probability * 100) }}%</p>
+    </div>
+
+    {% elif level == "mild" %}
+    <div class="risk-banner risk-mild">
+      <div class="risk-icon">&#128993;</div>
+      <h1>Mild Risk</h1>
+      <p class="risk-probability">Probability: {{ "%.1f"|format(probability * 100) }}%</p>
+    </div>
+
+    {% else %}
+    <div class="risk-banner risk-high">
+      <div class="risk-icon">&#128308;</div>
+      <h1>High Risk</h1>
+      <p class="risk-probability">Probability: {{ "%.1f"|format(probability * 100) }}%</p>
+    </div>
+    {% endif %}
+
+    <!-- ====== RECOMMENDATIONS ====== -->
+    <div class="rec-body">
+
+      {% if level == "low" %}
+      <!-- LOW RISK -->
+      <h2 class="rec-title">Great News, {{ name }}! Keep It Up</h2>
+      <p class="rec-subtitle">Your results suggest a low likelihood of heart disease. Here's how to maintain your heart health:</p>
+
+      <div class="rec-cards">
+        <div class="rec-card">
+          <div class="rec-card-icon">🏃</div>
+          <h3>Stay Active</h3>
+          <p>Continue exercising at least 150 minutes per week. Activities like brisk walking, swimming, or cycling keep your heart strong.</p>
+        </div>
+        <div class="rec-card">
+          <div class="rec-card-icon">🥗</div>
+          <h3>Balanced Diet</h3>
+          <p>Maintain a diet rich in fruits, vegetables, whole grains, and lean proteins. Limit saturated fats and added sugars.</p>
+        </div>
+        <div class="rec-card">
+          <div class="rec-card-icon">😴</div>
+          <h3>Quality Sleep</h3>
+          <p>Aim for 7–9 hours of sleep per night. Good sleep reduces stress hormones and supports cardiovascular recovery.</p>
+        </div>
+        <div class="rec-card">
+          <div class="rec-card-icon">🩺</div>
+          <h3>Routine Check-ups</h3>
+          <p>Visit your doctor annually for blood pressure, cholesterol, and blood sugar screenings to catch changes early.</p>
+        </div>
+      </div>
+
+      {% elif level == "mild" %}
+      <!-- MILD RISK -->
+      <h2 class="rec-title">Moderate Concern, {{ name }} — Take Action Now</h2>
+      <p class="rec-subtitle">Your results indicate a moderate risk. With some lifestyle changes, you can significantly lower your chances:</p>
+
+      <div class="rec-cards">
+        <div class="rec-card">
+          <div class="rec-card-icon">🩺</div>
+          <h3>See Your Doctor</h3>
+          <p>Schedule an appointment for a full cardiac check-up. Discuss your results and get personalized medical advice.</p>
+        </div>
+        <div class="rec-card">
+          <div class="rec-card-icon">🚭</div>
+          <h3>Quit Smoking</h3>
+          <p>If you smoke, quitting is the single most impactful thing you can do. Smoking doubles the risk of heart disease.</p>
+        </div>
+        <div class="rec-card">
+          <div class="rec-card-icon">🧂</div>
+          <h3>Reduce Sodium</h3>
+          <p>Limit salt intake to under 2,300 mg/day. High sodium raises blood pressure, a major heart disease risk factor.</p>
+        </div>
+        <div class="rec-card">
+          <div class="rec-card-icon">🏋️</div>
+          <h3>Increase Activity</h3>
+          <p>Aim for 30 minutes of moderate exercise daily. Even walking after meals can improve blood sugar and blood pressure.</p>
+        </div>
+        <div class="rec-card">
+          <div class="rec-card-icon">⚖️</div>
+          <h3>Manage Weight</h3>
+          <p>If overweight, losing even 5–10% of body weight can reduce cholesterol, blood pressure, and blood sugar levels.</p>
+        </div>
+        <div class="rec-card">
+          <div class="rec-card-icon">🧘</div>
+          <h3>Stress Management</h3>
+          <p>Chronic stress contributes to heart disease. Practice meditation, deep breathing, or hobbies to manage stress levels.</p>
+        </div>
+      </div>
+
+      {% else %}
+      <!-- HIGH RISK -->
+      <h2 class="rec-title">Urgent, {{ name }} — Consult a Doctor Immediately</h2>
+      <p class="rec-subtitle">Your results suggest a high probability of heart disease. Please take the following steps seriously:</p>
+
+      <div class="rec-cards">
+        <div class="rec-card rec-card-urgent">
+          <div class="rec-card-icon">🚨</div>
+          <h3>Immediate Medical Attention</h3>
+          <p>Contact your doctor or visit a cardiologist as soon as possible. Do not ignore chest pain, shortness of breath, or fatigue.</p>
+        </div>
+        <div class="rec-card rec-card-urgent">
+          <div class="rec-card-icon">💊</div>
+          <h3>Medication Review</h3>
+          <p>Your doctor may prescribe statins for cholesterol, ACE inhibitors for blood pressure, or aspirin therapy. Follow their guidance strictly.</p>
+        </div>
+        <div class="rec-card">
+          <div class="rec-card-icon">🫀</div>
+          <h3>Cardiac Testing</h3>
+          <p>Request an ECG, echocardiogram, or stress test. These can reveal blockages, valve issues, or abnormal heart rhythms.</p>
+        </div>
+        <div class="rec-card">
+          <div class="rec-card-icon">🚭</div>
+          <h3>Quit Smoking & Alcohol</h3>
+          <p>Both smoking and excessive alcohol significantly increase heart disease risk. Seek help programs if needed.</p>
+        </div>
+        <div class="rec-card">
+          <div class="rec-card-icon">🥦</div>
+          <h3>Heart-Healthy Diet</h3>
+          <p>Follow the DASH or Mediterranean diet. Focus on omega-3 fatty acids (fish, nuts), fiber, and potassium-rich foods.</p>
+        </div>
+        <div class="rec-card">
+          <div class="rec-card-icon">📋</div>
+          <h3>Monitor Daily</h3>
+          <p>Track your blood pressure, heart rate, and symptoms daily. Keep a log to share with your healthcare provider.</p>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ====== BACK BUTTON ====== -->
+      <a href="/" class="back-btn">← Back to Prediction</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-logo"><span>❤️</span> CardioCare</div>
+      <p class="footer-desc">Advanced Machine Learning for Cardiovascular Disease Prediction. Empowering individuals to take control of their heart health through early detection algorithms.</p>
+      <div class="footer-bottom">
+        <p>⚠️ Disclaimer: This tool uses a machine learning model for prediction and is NOT a substitute for professional medical diagnosis. Always consult a qualified healthcare provider.</p>
+        <p style="margin-top: 10px;">&copy; 2026 CardioCare. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

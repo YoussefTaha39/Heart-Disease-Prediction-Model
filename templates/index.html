@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CardioCare | Advanced Heart Disease Prediction</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    .alert-popup {
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #f43f5e;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      font-size: 14px;
+      font-weight: 500;
+      animation: slideDown 0.3s ease-out;
+      max-width: 90%;
+      text-align: center;
+    }
+
+    .alert-popup.show {
+      display: block;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="header-container">
+      <a href="/" class="logo"><span>❤️</span> CardioCare</a>
+      <nav>
+        <a href="#predict">Predict</a>
+        <a href="#history">History</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>AI-Powered Heart Health Analysis</h1>
+      <p>Assess your cardiovascular risk in seconds using advanced machine learning. Fast, secure, and insightful.</p>
+      <a href="#predict" class="btn-primary">Start Prediction</a>
+    </div>
+    <div class="hero-image">
+      <!-- The generated hero image -->
+      <img src="/static/heart_hero.png" alt="Medical Technology Heart">
+    </div>
+  </section>
+
+  <div id="alert" class="alert-popup"></div>
+
+  <!-- PREDICTION SECTION -->
+  <section id="predict" class="prediction-section">
+    <div class="form-container">
+      <h2>Heart Disease Prediction</h2>
+
+      <form id="form">
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>Full Name</h3>
+            <p class="field-desc">Enter your full name for the medical record.</p>
+          </div>
+          <input id="patientName" placeholder="e.g. John Doe" type="text" data-label="Name">
+        </div>
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>Age</h3>
+            <p class="field-desc">Your current age in years. Heart disease risk increases with age, especially after 45 for men and 55 for women.</p>
+          </div>
+          <input name="age" placeholder="e.g. 52" type="number" min="0" max="120" data-label="Age">
+        </div>
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>Sex</h3>
+            <p class="field-desc">Your biological sex. Males statistically have a higher risk of heart disease.</p>
+          </div>
+          <select name="sex" data-label="Sex">
+            <option value="" disabled selected>— Select —</option>
+            <option value="1">Male</option>
+            <option value="0">Female</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>Chest Pain Type</h3>
+            <p class="field-desc">The type of chest pain you experience during daily activities or exercise.</p>
+          </div>
+          <select name="cp" data-label="Chest Pain Type">
+            <option value="" disabled selected>— Select —</option>
+            <option value="0">Typical Angina</option>
+            <option value="1">Atypical Angina</option>
+            <option value="2">Non-Anginal Pain</option>
+            <option value="3">Asymptomatic (No Pain)</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>Resting Blood Pressure</h3>
+            <p class="field-desc">Your blood pressure (mm Hg) when you're idle and at rest — for example, lying on your bed. Normal is around 120; above 140 is considered high.</p>
+          </div>
+          <input name="trestbps" placeholder="e.g. 130" type="number" min="80" max="200" data-label="Resting Blood Pressure">
+        </div>
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>Cholesterol</h3>
+            <p class="field-desc">Your serum cholesterol level in mg/dl. This is the total cholesterol in your blood. Values above 200 mg/dl are considered borderline high.</p>
+          </div>
+          <input name="chol" placeholder="e.g. 250" type="number" min="100" max="500" data-label="Cholesterol">
+        </div>
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>Fasting Blood Sugar</h3>
+            <p class="field-desc">Whether your fasting blood sugar is above 120 mg/dl. High blood sugar can damage blood vessels over time.</p>
+          </div>
+          <select name="fbs" data-label="Fasting Blood Sugar">
+            <option value="" disabled selected>— Select —</option>
+            <option value="1">Yes (> 120 mg/dl)</option>
+            <option value="0">No (≤ 120 mg/dl)</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>Resting ECG</h3>
+            <p class="field-desc">Results of your resting electrocardiogram — measures your heart's electrical activity at rest.</p>
+          </div>
+          <select name="restecg" data-label="Resting ECG">
+            <option value="" disabled selected>— Select —</option>
+            <option value="0">Normal</option>
+            <option value="1">ST-T Wave Abnormality</option>
+            <option value="2">Left Ventricular Hypertrophy</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>Max Heart Rate</h3>
+            <p class="field-desc">The maximum heart rate achieved during exercise (bpm). A lower max heart rate during exertion can indicate heart problems. Typical range: 60–202 bpm.</p>
+          </div>
+          <input name="thalach" placeholder="e.g. 150" type="number" min="60" max="202" data-label="Max Heart Rate">
+        </div>
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>Exercise-Induced Angina</h3>
+            <p class="field-desc">Whether physical exercise triggers chest pain. Exercise angina suggests reduced blood flow to the heart during activity.</p>
+          </div>
+          <select name="exang" data-label="Exercise-Induced Angina">
+            <option value="" disabled selected>— Select —</option>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>Oldpeak (ST Depression)</h3>
+            <p class="field-desc">ST depression induced by exercise relative to rest. This measures how much the heart's electrical signal drops during exercise. Higher values may indicate ischemia. Typical range: 0–6.2.</p>
+          </div>
+          <input name="oldpeak" placeholder="e.g. 1.0" type="number" step="0.1" min="0" max="6.2" data-label="Oldpeak">
+        </div>
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>Slope</h3>
+            <p class="field-desc">The slope of the peak exercise ST segment on your ECG reading.</p>
+          </div>
+          <select name="slope" data-label="Slope">
+            <option value="" disabled selected>— Select —</option>
+            <option value="0">Upsloping (Normal)</option>
+            <option value="1">Flat (Possible Concern)</option>
+            <option value="2">Downsloping (Unhealthy)</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>CA (Major Vessels)</h3>
+            <p class="field-desc">Number of major blood vessels colored by fluoroscopy. More colored vessels mean better blood flow.</p>
+          </div>
+          <select name="ca" data-label="CA (Major Vessels)">
+            <option value="" disabled selected>— Select —</option>
+            <option value="0">0 Vessels</option>
+            <option value="1">1 Vessel</option>
+            <option value="2">2 Vessels</option>
+            <option value="3">3 Vessels</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <div class="field-header">
+            <h3>Thalassemia</h3>
+            <p class="field-desc">A blood disorder that affects hemoglobin and oxygen delivery to your heart.</p>
+          </div>
+          <select name="thal" data-label="Thalassemia">
+            <option value="" disabled selected>— Select —</option>
+            <option value="1">Normal</option>
+            <option value="2">Fixed Defect</option>
+            <option value="3">Reversible Defect</option>
+          </select>
+        </div>
+
+        <button type="submit" class="submit-btn">Predict Now</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- HISTORY SECTION -->
+  <section id="history" class="history-section">
+    <div class="history-container">
+      <h2>Your Prediction History</h2>
+      
+      <div class="table-wrapper">
+        <table id="historyTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Sex</th>
+              <th>Risk Level</th>
+              <th>Probability</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <!-- Populated via JavaScript -->
+          </tbody>
+        </table>
+        <div id="emptyHistory" style="display: none;">
+          You haven't made any predictions yet. Fill out the form above to get started!
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-logo"><span>❤️</span> CardioCare</div>
+      <p class="footer-desc">Advanced Machine Learning for Cardiovascular Disease Prediction. Empowering individuals to take control of their heart health through early detection algorithms.</p>
+      <div class="footer-bottom">
+        <p>⚠️ Disclaimer: This tool uses a machine learning model for prediction and is NOT a substitute for professional medical diagnosis. Always consult a qualified healthcare provider.</p>
+        <p style="margin-top: 10px;">&copy; 2026 CardioCare. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // --- NOTIFICATIONS ---
+    let alertTimeout;
+    const alertPopup = document.getElementById('alert');
+
+    function showAlert(message) {
+      alertPopup.textContent = message;
+      alertPopup.classList.add('show');
+      clearTimeout(alertTimeout);
+      alertTimeout = setTimeout(() => {
+        alertPopup.classList.remove('show');
+      }, 3000);
+    }
+
+    // --- VALIDATION ---
+    function validateInput(input) {
+      const value = parseFloat(input.value);
+      const min = parseFloat(input.min);
+      const max = parseFloat(input.max);
+      const label = input.dataset.label || input.name;
+
+      if (input.value === '') {
+        input.classList.remove('error');
+        return true;
+      }
+
+      if (isNaN(value)) {
+        input.classList.add('error');
+        showAlert(`${label} must be a valid number`);
+        return false;
+      }
+
+      if (value < min) {
+        input.classList.add('error');
+        showAlert(`${label} cannot be less than ${min}`);
+        return false;
+      }
+
+      if (value > max) {
+        input.classList.add('error');
+        showAlert(`${label} cannot be greater than ${max}`);
+        return false;
+      }
+
+      input.classList.remove('error');
+      return true;
+    }
+
+    const inputs = document.querySelectorAll('input[type="number"]');
+    const selects = document.querySelectorAll('select');
+
+    inputs.forEach(input => {
+      // Validate only on blur to not interrupt typing
+      input.addEventListener('blur', function () {
+        if (this.value !== '') validateInput(this);
+      });
+
+      // Just clear error state when typing begins
+      input.addEventListener('input', function () {
+        this.classList.remove('error');
+      });
+    });
+
+    selects.forEach(sel => {
+      sel.addEventListener('change', function () {
+        this.classList.remove('error');
+      });
+    });
+
+    // --- HISTORY MANAGEMENT ---
+    function loadHistory() {
+      const history = JSON.parse(localStorage.getItem('cardioHistory') || '[]');
+      const tbody = document.getElementById('historyBody');
+      const emptyMsg = document.getElementById('emptyHistory');
+      const table = document.getElementById('historyTable');
+
+      if (history.length === 0) {
+        table.style.display = 'none';
+        emptyMsg.style.display = 'block';
+        return;
+      }
+
+      table.style.display = 'table';
+      emptyMsg.style.display = 'none';
+      tbody.innerHTML = '';
+
+      history.forEach(item => {
+        const row = document.createElement('tr');
+        
+        let badgeClass = 'badge-low';
+        let riskText = 'Low';
+        const prob = parseFloat(item.probability);
+        
+        if (prob >= 60) { badgeClass = 'badge-high'; riskText = 'High'; }
+        else if (prob >= 30) { badgeClass = 'badge-mild'; riskText = 'Mild'; }
+
+        row.innerHTML = `
+          <td>${item.date}</td>
+          <td>${item.name || 'N/A'}</td>
+          <td>${item.age}</td>
+          <td>${item.sex}</td>
+          <td><span class="badge ${badgeClass}">${riskText} Risk</span></td>
+          <td>${item.probability}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Load history on page load
+    document.addEventListener('DOMContentLoaded', loadHistory);
+
+    // --- FORM SUBMISSION ---
+    document.getElementById("form").onsubmit = async function (e) {
+      e.preventDefault();
+
+      let isValid = true;
+      const nameInput = document.getElementById('patientName');
+
+      // Validate Name
+      if (nameInput.value.trim() === '') {
+        nameInput.classList.add('error');
+        isValid = false;
+      } else {
+        nameInput.classList.remove('error');
+      }
+      
+      // Validate Inputs
+      inputs.forEach(input => {
+        if (input.value === '') {
+          input.classList.add('error');
+          isValid = false;
+        } else if (!validateInput(input)) {
+          isValid = false;
+        }
+      });
+
+      // Validate Selects
+      selects.forEach(sel => {
+        if (!sel.value) {
+          sel.classList.add('error');
+          isValid = false;
+        }
+      });
+
+      if (!isValid) {
+        showAlert('Please correctly fill in all fields before submitting');
+        return;
+      }
+
+      // Prepare request
+      const formData = new FormData(this);
+
+      try {
+        const response = await fetch("/predict", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+        const probabilityPercent = (data.probability * 100).toFixed(1);
+
+        // Save to History
+        const record = {
+          date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+          name: nameInput.value.trim(),
+          age: formData.get('age'),
+          sex: formData.get('sex') === '1' ? 'Male' : 'Female',
+          prediction: data.prediction,
+          probability: probabilityPercent + '%'
+        };
+        
+        const history = JSON.parse(localStorage.getItem('cardioHistory') || '[]');
+        history.unshift(record); // Add to beginning
+        localStorage.setItem('cardioHistory', JSON.stringify(history));
+
+        // Redirect to recommendations page
+        window.location.href = "/recommendations?probability=" + 
+          data.probability.toFixed(4) + 
+          "&prediction=" + data.prediction +
+          "&name=" + encodeURIComponent(nameInput.value.trim());
+          
+      } catch (error) {
+        showAlert('An error occurred while making the prediction.');
+      }
+    };
+  </script>
+</body>
+</html>

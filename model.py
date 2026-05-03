@@ -1,169 +1,136 @@
-# Import Libraries
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
+import numpy as np
+import joblib
 
-# Load Dataset
-df = pd.read_csv('/kaggle/input/competitions/playground-series-s6e2/train.csv')
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
 
-# Display first rows
-print(df.head())
+from sklearn.model_selection import StratifiedKFold, cross_validate
 
-# Check dataset information
-print(df.info())
-print(df.isnull().sum())
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
 
-# Remove unnecessary column
-df = df.drop(columns=['id'])
+# =========================
+# 1. LOAD DATA
+# =========================
+df = pd.read_csv("heart_cleveland_upload.csv")
+# =========================
+# 2. TARGET
+# =========================
+df["target"] = df["condition"].apply(lambda x: 1 if x > 0 else 0)
+df = df.drop(columns=["condition"])
 
-# Encode target column
-df['Heart Disease'] = df['Heart Disease'].map({
-    'Absence': 0,
-    'Presence': 1
-})
+X = df.drop("target", axis=1)
+y = df["target"]
 
-# Separate features and target
-X = df.drop('Heart Disease', axis=1)
-y = df['Heart Disease']
 
-# Apply Feature Scaling
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+# =========================
+# 3. FEATURES
+# =========================
+numeric_features = ["age", "trestbps", "chol", "thalach", "oldpeak"]
 
-# Convert scaled data to DataFrame
-X_scaled = pd.DataFrame(X_scaled, columns=X.columns)
+categorical_features = [
+    "sex", "cp", "fbs", "restecg",
+    "exang", "slope", "ca", "thal"
+]
 
-# Combine features with target
-clean_df = X_scaled
-clean_df['Heart Disease'] = y
 
-# Save cleaned dataset
-clean_df.to_csv("clean_dataset.csv", index=False)
+# =========================
+# 4. PREPROCESSING
+# =========================
+numeric_pipe = Pipeline([
+    ("imputer", SimpleImputer(strategy="median")),
+    ("scaler", StandardScaler())
+])
 
-# Display final dataset
-print(clean_df.head())
+categorical_pipe = Pipeline([
+    ("imputer", SimpleImputer(strategy="most_frequent")),
+    ("onehot", OneHotEncoder(handle_unknown="ignore"))
+])
 
-# ==============================
-# 14. Function Evaluation
-# ==============================
+preprocessor = ColumnTransformer([
+    ("num", numeric_pipe, numeric_features),
+    ("cat", categorical_pipe, categorical_features)
+])
 
-def evaluate_model(name, model, X_train, y_train, X_val, y_val):
-    # Train
-    model.fit(X_train, y_train)
+# =========================
+# 5. MODELS
+# =========================
+models = {
+    "Decision Tree": DecisionTreeClassifier(max_depth=5, ccp_alpha=0.01, random_state=42),
+    "Random Forest": RandomForestClassifier(n_estimators=200, random_state=42),
+    "Gradient Boosting": GradientBoostingClassifier(),
+    "Logistic Regression": LogisticRegression(max_iter=1000),
+    "SVM (RBF)": SVC(probability=True)
+}
 
-    # Predictions
-    y_train_pred = model.predict(X_train)
-    y_val_pred = model.predict(X_val)
+# =========================
+# 6. CROSS VALIDATION
+# =========================
+cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
 
-    # Metrics
-    train_acc = accuracy_score(y_train, y_train_pred)
-    val_acc = accuracy_score(y_val, y_val_pred)
-    precision = precision_score(y_val, y_val_pred)
-    recall = recall_score(y_val, y_val_pred)
-    f1 = f1_score(y_val, y_val_pred)
+results = []
 
-    print(f"\n{name}")
-    print("Train Accuracy:", train_acc)
-    print("Validation Accuracy:", val_acc)
-    print("Precision:", precision)
-    print("Recall:", recall)
-    print("F1 Score:", f1)
+print("\n=== TRAINING MODELS ===\n")
 
-    # Overfitting Check
-    print("Overfitting Difference:", abs(train_acc - val_acc))
+best_model_name = None
+best_score = -1
+best_pipeline = None
 
-    # Confusion Matrix
-    cm = confusion_matrix(y_val, y_val_pred)
-    print("Confusion Matrix:\n", cm)
+for name, model in models.items():
+    pipe = Pipeline([
+        ("prep", preprocessor),
+        ("model", model)
+    ])
 
-    # Visual Confusion Matrix
-    ConfusionMatrixDisplay.from_predictions(y_val, y_val_pred)
-    plt.title(name)
-    plt.show()
+    scores = cross_validate(
+        pipe,
+        X,
+        y,
+        cv=cv,
+        scoring=["accuracy", "roc_auc", "f1", "recall"]
+    )
 
-    # Classification Report
-    print("\nClassification Report:\n", classification_report(y_val, y_val_pred))
+    mean_auc = np.mean(scores["test_roc_auc"])
 
-    return {
+    results.append({
         "Model": name,
-        "Train Acc": train_acc,
-        "Val Acc": val_acc,
-        "Precision": precision,
-        "Recall": recall,
-        "F1": f1
-    }
+        "Accuracy": np.mean(scores["test_accuracy"]),
+        "ROC-AUC": mean_auc,
+        "F1": np.mean(scores["test_f1"]),
+        "Recall": np.mean(scores["test_recall"])
+    })
 
-# ==============================
-# Evaluate Logistic Regression 
-# ==============================
+    print(f"{name} → ROC-AUC: {mean_auc:.4f}")
 
-lr_metrics = evaluate_model(
-    "Logistic Regression",
-    lr_grid.best_estimator_,
-    X_train, y_train, X_val, y_val
-)
+    # Track best model
+    if mean_auc > best_score:
+        best_score = mean_auc
+        best_model_name = name
+        best_pipeline = pipe
 
-# ==============================
-# Evaluate Decision Tree
-# ==============================
 
-dt_metrics = evaluate_model(
-    "Decision Tree",
-    dt_grid.best_estimator_,
-    X_train, y_train, X_val, y_val
-)
+# =========================
+# 7. RESULTS TABLE
+# =========================
+results_df = pd.DataFrame(results)
 
-# ==============================
-# Evaluate Random Forest
-# ==============================
+print("\n=== MODEL COMPARISON ===")
+print(results_df)
+# =========================
+# 8. TRAIN BEST MODEL ON FULL DATA
+# =========================
+print(f"\n✅ Best Model: {best_model_name}")
 
-rf_metrics = evaluate_model(
-    "Random Forest",
-    rf_grid.best_estimator_,
-    X_train, y_train, X_val, y_val
-)
+best_pipeline.fit(X, y)
 
-# ==============================
-# Evaluate XGBoost
-# ==============================
+# =========================
+# 9. SAVE MODEL (FOR FLASK)
+# =========================
+joblib.dump(best_pipeline, "heart_model.pkl")
 
-xgb_metrics = evaluate_model(
-    "XGBoost",
-    xgb_grid.best_estimator_,
-    X_train, y_train, X_val, y_val
-)
-
-# ==============================
-# 15. Compare Models
-# ==============================
-
-results = pd.DataFrame([lr_metrics, dt_metrics, rf_metrics, xgb_metrics])
-print("\nModel Comparison:\n")
-print(results)
-
-# ==============================
-# 16. Choose Best Model
-# ==============================
-
-best_model = results.sort_values(by="Recall", ascending=False).iloc[0]
-print("\nBest Model:\n", best_model)
-
-# ==============================
-# 17. Test on New Data
-# ==============================
-
-sample = X_val.iloc[0:1]
-
-best_model_name = best_model["Model"]
-
-if best_model_name == "Logistic Regression":
-    final_model = lr_grid.best_estimator_
-elif best_model_name == "Decision Tree":
-    final_model = dt_grid.best_estimator_
-elif best_model_name == "Random Forest":
-    final_model = rf_grid.best_estimator_
-else:
-    final_model = xgb_grid.best_estimator_
-
-prediction = final_model.predict(sample)
-
-print("\nTest Sample Prediction:", prediction) 
+print("\n💾 Model saved as heart_model.pkl")
