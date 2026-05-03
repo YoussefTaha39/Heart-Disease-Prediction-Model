@@ -1,70 +1,68 @@
 
-
 # ❤️ Heart Disease Prediction Model
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue)
-![ML](https://img.shields.io/badge/Machine%20Learning-Model-green)
-![Status](https://img.shields.io/badge/Project-In%20Progress-orange)
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Model-green)
+![Status](https://img.shields.io/badge/Status-In%20Progress-orange)
 
 ---
 
 ## 📌 Overview
 
-This project focuses on building a **Machine Learning model** to predict the likelihood of heart disease based on patient medical data.
+This project focuses on developing a **Machine Learning model** to predict the likelihood of heart disease using patient medical data.
 
-The model analyzes features such as:
+### 🩺 Key Features Analyzed:
+- Age
+- Blood Pressure
+- Cholesterol Levels
+- Other clinical indicators
 
-* Age
-* Blood Pressure
-* Cholesterol Levels
-* Other clinical indicators
-
-The goal is to assist in **early detection and decision-making** using data-driven insights.
+### 🎯 Project Goal:
+To support **early detection and informed medical decision-making** through data-driven predictive analysis.
 
 ---
 
 ## 🚀 Features
 
-* 🔍 Data preprocessing & cleaning
-* 📊 Multiple ML models for comparison
-* 📈 Model evaluation & performance metrics
-* 💾 Model saving using Pickle / Joblib
-* 🖥️ Interactive UI using Streamlit
+- 🔍 Data preprocessing & cleaning
+- 📊 Multiple ML models for performance comparison
+- 📈 Model evaluation using accuracy metrics
+- 💾 Model serialization with Pickle / Joblib
+- 🖥️ Interactive web interface using Streamlit
 
 ---
 
 ## 🧠 Models Implemented
 
-* Logistic Regression
-* Decision Tree
-* Random Forest ⭐
+- Logistic Regression
+- Decision Tree
+- Random Forest ⭐ *(Primary Model)*
 
 ---
 
 ## 🛠️ Tech Stack
 
-* Python 🐍
-* Pandas
-* NumPy
-* Scikit-learn
-* Matplotlib
-* Seaborn
-* Streamlit
+- Python 🐍
+- Pandas
+- NumPy
+- Scikit-learn
+- Matplotlib
+- Seaborn
+- Streamlit
 
 ---
 
 ## 📌 Prerequisites
 
-Make sure you have the following installed:
+Before starting, ensure you have the following installed:
 
-* Python 3.10+
-* Git
-* Visual Studio Code *(recommended)*
+- Python 3.10+
+- Git
+- Visual Studio Code *(recommended)*
 
-Also:
-
-* Create a GitHub account
-* Accept the repository invitation
+### 🔗 Additional Requirements:
+- GitHub account
+- Repository invitation access
 
 ---
 
@@ -77,29 +75,45 @@ git clone https://github.com/YoussefTaha39/Heart-Disease-Prediction-Model.git
 cd Heart-Disease-Prediction-Model
 ```
 
+### 2️⃣ Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
 ---
 
 ## 💻 Workflow Guidelines
 
 ### ⚠️ Important Rules
 
-* 🔄 Always pull the latest changes before starting work:
+### 📂 Always ensure you're inside the project directory:
+
+```bash
+cd /path/to/Heart-Disease-Prediction-Model
+```
+### Then install all dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### 🔄 Pull the latest changes before starting:
 
 ```bash
 git pull origin dev
 ```
 
-* 🌿 Always work on the **`dev` branch**, NOT main:
+### 🌿 Work only on the `dev` branch:
 
 ```bash
 git checkout dev
 ```
 
-* ✅ After finishing your work:
+### ✅ After completing your work:
 
-  * Add your changes
-  * Commit with a clear message
-  * Push to `dev`
+1. Add your changes
+2. Commit with a clear message
+3. Push to the `dev` branch
 
 ```bash
 git add .
@@ -107,4 +121,11 @@ git commit -m "Your message here"
 git push origin dev
 ```
 
----
+
+
+## ❤️ Project Vision
+
+Building reliable AI-powered healthcare tools that can contribute to smarter, faster, and more accessible medical diagnostics.
+
+```
+```
