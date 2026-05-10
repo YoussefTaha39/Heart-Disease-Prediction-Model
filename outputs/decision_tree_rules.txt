@@ -1,0 +1,133 @@
+|--- ST slope_1 <= 0.50
+|   |--- chest pain type_4 <= 0.50
+|   |   |--- sex <= 0.50
+|   |   |   |--- max heart rate <= 112.00
+|   |   |   |   |--- chest pain type_1 <= 0.50
+|   |   |   |   |   |--- class: 1
+|   |   |   |   |--- chest pain type_1 >  0.50
+|   |   |   |   |   |--- class: 0
+|   |   |   |--- max heart rate >  112.00
+|   |   |   |   |--- fasting blood sugar <= 0.50
+|   |   |   |   |   |--- cholesterol <= 235.50
+|   |   |   |   |   |   |--- class: 0
+|   |   |   |   |   |--- cholesterol >  235.50
+|   |   |   |   |   |   |--- truncated branch of depth 4
+|   |   |   |   |--- fasting blood sugar >  0.50
+|   |   |   |   |   |--- class: 1
+|   |   |--- sex >  0.50
+|   |   |   |--- max heart rate <= 130.50
+|   |   |   |   |--- resting ecg_1 <= 0.50
+|   |   |   |   |   |--- oldpeak <= 1.70
+|   |   |   |   |   |   |--- truncated branch of depth 7
+|   |   |   |   |   |--- oldpeak >  1.70
+|   |   |   |   |   |   |--- class: 1
+|   |   |   |   |--- resting ecg_1 >  0.50
+|   |   |   |   |   |--- class: 1
+|   |   |   |--- max heart rate >  130.50
+|   |   |   |   |--- ST slope_3 <= 0.50
+|   |   |   |   |   |--- cholesterol <= 261.00
+|   |   |   |   |   |   |--- truncated branch of depth 8
+|   |   |   |   |   |--- cholesterol >  261.00
+|   |   |   |   |   |   |--- truncated branch of depth 2
+|   |   |   |   |--- ST slope_3 >  0.50
+|   |   |   |   |   |--- resting bp s <= 115.00
+|   |   |   |   |   |   |--- class: 1
+|   |   |   |   |   |--- resting bp s >  115.00
+|   |   |   |   |   |   |--- class: 0
+|   |--- chest pain type_4 >  0.50
+|   |   |--- sex <= 0.50
+|   |   |   |--- oldpeak <= 1.65
+|   |   |   |   |--- resting bp s <= 141.00
+|   |   |   |   |   |--- resting ecg_2 <= 0.50
+|   |   |   |   |   |   |--- truncated branch of depth 4
+|   |   |   |   |   |--- resting ecg_2 >  0.50
+|   |   |   |   |   |   |--- class: 0
+|   |   |   |   |--- resting bp s >  141.00
+|   |   |   |   |   |--- age <= 58.00
+|   |   |   |   |   |   |--- truncated branch of depth 3
+|   |   |   |   |   |--- age >  58.00
+|   |   |   |   |   |   |--- class: 1
+|   |   |   |--- oldpeak >  1.65
+|   |   |   |   |--- age <= 63.50
+|   |   |   |   |   |--- class: 1
+|   |   |   |   |--- age >  63.50
+|   |   |   |   |   |--- class: 0
+|   |   |--- sex >  0.50
+|   |   |   |--- max heart rate <= 147.50
+|   |   |   |   |--- resting ecg_2 <= 0.50
+|   |   |   |   |   |--- resting bp s <= 131.00
+|   |   |   |   |   |   |--- truncated branch of depth 9
+|   |   |   |   |   |--- resting bp s >  131.00
+|   |   |   |   |   |   |--- truncated branch of depth 5
+|   |   |   |   |--- resting ecg_2 >  0.50
+|   |   |   |   |   |--- class: 1
+|   |   |   |--- max heart rate >  147.50
+|   |   |   |   |--- fasting blood sugar <= 0.50
+|   |   |   |   |   |--- oldpeak <= 0.20
+|   |   |   |   |   |   |--- class: 1
+|   |   |   |   |   |--- oldpeak >  0.20
+|   |   |   |   |   |   |--- truncated branch of depth 5
+|   |   |   |   |--- fasting blood sugar >  0.50
+|   |   |   |   |   |--- class: 1
+|--- ST slope_1 >  0.50
+|   |--- chest pain type_4 <= 0.50
+|   |   |--- oldpeak <= 2.20
+|   |   |   |--- age <= 56.50
+|   |   |   |   |--- resting bp s <= 191.00
+|   |   |   |   |   |--- resting bp s <= 119.00
+|   |   |   |   |   |   |--- truncated branch of depth 5
+|   |   |   |   |   |--- resting bp s >  119.00
+|   |   |   |   |   |   |--- class: 0
+|   |   |   |   |--- resting bp s >  191.00
+|   |   |   |   |   |--- class: 1
+|   |   |   |--- age >  56.50
+|   |   |   |   |--- age <= 59.50
+|   |   |   |   |   |--- oldpeak <= 0.90
+|   |   |   |   |   |   |--- truncated branch of depth 3
+|   |   |   |   |   |--- oldpeak >  0.90
+|   |   |   |   |   |   |--- class: 0
+|   |   |   |   |--- age >  59.50
+|   |   |   |   |   |--- cholesterol <= 69.50
+|   |   |   |   |   |   |--- truncated branch of depth 3
+|   |   |   |   |   |--- cholesterol >  69.50
+|   |   |   |   |   |   |--- truncated branch of depth 3
+|   |   |--- oldpeak >  2.20
+|   |   |   |--- class: 1
+|   |--- chest pain type_4 >  0.50
+|   |   |--- oldpeak <= 0.45
+|   |   |   |--- max heart rate <= 148.50
+|   |   |   |   |--- cholesterol <= 42.50
+|   |   |   |   |   |--- resting bp s <= 124.00
+|   |   |   |   |   |   |--- class: 1
+|   |   |   |   |   |--- resting bp s >  124.00
+|   |   |   |   |   |   |--- truncated branch of depth 2
+|   |   |   |   |--- cholesterol >  42.50
+|   |   |   |   |   |--- age <= 65.50
+|   |   |   |   |   |   |--- class: 0
+|   |   |   |   |   |--- age >  65.50
+|   |   |   |   |   |   |--- truncated branch of depth 2
+|   |   |   |--- max heart rate >  148.50
+|   |   |   |   |--- max heart rate <= 181.50
+|   |   |   |   |   |--- sex <= 0.50
+|   |   |   |   |   |   |--- truncated branch of depth 3
+|   |   |   |   |   |--- sex >  0.50
+|   |   |   |   |   |   |--- truncated branch of depth 7
+|   |   |   |   |--- max heart rate >  181.50
+|   |   |   |   |   |--- class: 0
+|   |   |--- oldpeak >  0.45
+|   |   |   |--- exercise angina <= 0.50
+|   |   |   |   |--- cholesterol <= 81.50
+|   |   |   |   |   |--- class: 1
+|   |   |   |   |--- cholesterol >  81.50
+|   |   |   |   |   |--- resting bp s <= 131.50
+|   |   |   |   |   |   |--- truncated branch of depth 2
+|   |   |   |   |   |--- resting bp s >  131.50
+|   |   |   |   |   |   |--- class: 0
+|   |   |   |--- exercise angina >  0.50
+|   |   |   |   |--- cholesterol <= 329.50
+|   |   |   |   |   |--- resting bp s <= 152.00
+|   |   |   |   |   |   |--- class: 1
+|   |   |   |   |   |--- resting bp s >  152.00
+|   |   |   |   |   |   |--- truncated branch of depth 2
+|   |   |   |   |--- cholesterol >  329.50
+|   |   |   |   |   |--- class: 0
