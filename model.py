@@ -13,21 +13,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
 import joblib
-import os
-
-warnings.filterwarnings("ignore")
 
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.impute import SimpleImputer
 
-from sklearn.model_selection import (
-    train_test_split,
-    StratifiedKFold,
-    GridSearchCV,
-    cross_validate
-)
+from sklearn.model_selection import StratifiedKFold, cross_validate
 
 from sklearn.metrics import (
     classification_report,
@@ -242,17 +234,11 @@ plt.close()
 X = df.drop("target", axis=1)
 y = df["target"]
 
-# ============================================================
-# 6. FEATURE GROUPS
-# ============================================================
 
-numeric_features = [
-    "age",
-    "resting bp s",
-    "cholesterol",
-    "max heart rate",
-    "oldpeak"
-]
+# =========================
+# 3. FEATURES
+# =========================
+numeric_features = ["age", "trestbps", "chol", "thalach", "oldpeak"]
 
 categorical_features = [
     "chest pain type",
@@ -266,16 +252,14 @@ binary_features = [
     "exercise angina"
 ]
 
-# ============================================================
-# 7. PREPROCESSING PIPELINES
-# ============================================================
 
-def build_preprocessor(scale=True):
-
-    num_pipe = Pipeline([
-        ("imputer", SimpleImputer(strategy="median")),
-        *([("scaler", StandardScaler())] if scale else [])
-    ])
+# =========================
+# 4. PREPROCESSING
+# =========================
+numeric_pipe = Pipeline([
+    ("imputer", SimpleImputer(strategy="median")),
+    ("scaler", StandardScaler())
+])
 
     cat_pipe = Pipeline([
         ("imputer", SimpleImputer(strategy="most_frequent")),
@@ -434,9 +418,16 @@ for name, model in models.items():
 
         "F1 Score": np.mean(scores["test_f1"]),
 
-        "ROC-AUC": np.mean(scores["test_roc_auc"])
-    })
+    # Track best model
+    if mean_auc > best_score:
+        best_score = mean_auc
+        best_model_name = name
+        best_pipeline = pipe
 
+
+# =========================
+# 7. RESULTS TABLE
+# =========================
 results_df = pd.DataFrame(results)
 
 results_df = results_df.sort_values(
@@ -716,27 +707,4 @@ joblib.dump(
     "outputs/heart_disease_model.pkl"
 )
 
-print("\nRandom Forest model saved successfully!")
-
-# ============================================================
-# 22. SAVE FEATURE NAMES
-# ============================================================
-
-joblib.dump(
-    feature_names,
-    "outputs/feature_names.pkl"
-)
-
-print("Feature names saved successfully!")
-
-# ============================================================
-# 23. FINAL SUMMARY
-# ============================================================
-
-print("\n" + "=" * 60)
-print("FINAL SUMMARY")
-print("=" * 60)
-
-print(results_df.to_string(index=False))
-
-print("\nAll outputs saved inside outputs/ folder")
+print("\n💾 Model saved as heart_model.pkl")
