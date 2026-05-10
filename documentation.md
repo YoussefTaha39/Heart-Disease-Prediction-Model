@@ -1,362 +1,791 @@
-# 🫀 Heart Disease Prediction Model — Documentation
-
-> A machine learning pipeline for binary classification of heart disease presence or absence, trained on clinical patient data using Logistic Regression, Decision Tree, Random Forest, and XGBoost.
+# ❤️ CardioCare — Heart Disease Prediction Project
+## Full Documentation
 
 ---
 
-## 📁 Table of Contents
+## Table of Contents
 
 1. [Project Overview](#1-project-overview)
-2. [Dataset](#2-dataset)
-3. [Project Structure](#3-project-structure)
-4. [Pipeline Overview](#4-pipeline-overview)
-5. [Data Preprocessing](#5-data-preprocessing)
-6. [Feature Engineering](#6-feature-engineering)
-7. [Models](#7-models)
-   - [Logistic Regression](#71-logistic-regression)
-   - [Decision Tree](#72-decision-tree)
-   - [Random Forest](#73-random-forest)
-   - [XGBoost](#74-xgboost)
-8. [Hyperparameter Tuning](#8-hyperparameter-tuning)
-9. [Evaluation Metrics](#9-evaluation-metrics)
-10. [Model Comparison](#10-model-comparison)
-11. [Saved Artifacts](#11-saved-artifacts)
-12. [How to Run](#12-how-to-run)
-13. [Dependencies](#13-dependencies)
-14. [Future Improvements](#14-future-improvements)
+2. [Project Structure](#2-project-structure)
+3. [Dependencies & Setup](#3-dependencies--setup)
+4. [The Dataset](#4-the-dataset)
+5. [Machine Learning Pipeline — model.py](#5-machine-learning-pipeline--modelpy)
+   - 5.1 Imports
+   - 5.2 Exploratory Data Analysis (EDA)
+   - 5.3 Feature Engineering
+   - 5.4 Preprocessing Pipelines
+   - 5.5 Train/Test Split
+   - 5.6 Cross Validation
+   - 5.7 Models Used
+   - 5.8 GridSearchCV (Hyperparameter Tuning)
+   - 5.9 Evaluation Metrics
+   - 5.10 Visualizations & Outputs
+   - 5.11 Saving the Model
+6. [Web Application — app.py](#6-web-application--apppy)
+   - 6.1 Flask Setup
+   - 6.2 Routes
+   - 6.3 Risk Level Classification
+7. [Frontend — templates/](#7-frontend--templates)
+   - 7.1 index.html
+   - 7.2 recommendations.html
+8. [Styling — static/style.css](#8-styling--staticstylecss)
+9. [Output Files — outputs/](#9-output-files--outputs)
+10. [Key Machine Learning Concepts Explained](#10-key-machine-learning-concepts-explained)
+11. [How the Full System Works (End-to-End)](#11-how-the-full-system-works-end-to-end)
+12. [How to Run the Project](#12-how-to-run-the-project)
 
 ---
 
 ## 1. Project Overview
 
-This project builds, tunes, and evaluates multiple machine learning classifiers to predict whether a patient has heart disease based on clinical features. The target variable is binary:
+**CardioCare** is a full-stack AI-powered web application that predicts whether a patient is likely to have heart disease based on clinical measurements.
 
-| Label | Meaning |
+### What it does:
+- A user fills in a medical form on the website (age, blood pressure, cholesterol, etc.)
+- The form data is sent to a Flask backend
+- A trained **Random Forest** machine learning model predicts the probability of heart disease
+- The user is redirected to a personalized **recommendations page** based on their risk level (Low / Mild / High)
+
+### Tech Stack:
+| Layer | Technology |
 |---|---|
-| `0` | Absence of heart disease |
-| `1` | Presence of heart disease |
-
-The pipeline includes data cleaning, class imbalance detection, feature scaling, hyperparameter tuning via `GridSearchCV`, 10-fold cross-validation, and confusion matrix visualisation for every model.
+| Machine Learning | Python, scikit-learn |
+| Backend Server | Flask (Python) |
+| Frontend | HTML, CSS, JavaScript |
+| Data | Pandas, NumPy |
+| Visualization | Matplotlib, Seaborn |
+| Model Serialization | Joblib |
 
 ---
 
-## 2. Dataset
-
-| Property | Detail |
-|---|---|
-| Format | CSV (train/test split) |
-| Train path | `data/train.csv` |
-| Test path | `data/test.csv` |
-| Target column | `Heart Disease` (`Absence` / `Presence`) |
-
-### Features
-
-**Numerical Features**
-
-| Feature | Description |
-|---|---|
-| `Age` | Patient age in years |
-| `BP` | Resting blood pressure (mm Hg) |
-| `Cholesterol` | Serum cholesterol (mg/dl) |
-| `Max HR` | Maximum heart rate achieved |
-| `ST depression` | ST depression induced by exercise relative to rest |
-
-**Categorical Features**
-
-| Feature | Description |
-|---|---|
-| `Sex` | Patient sex (0 = female, 1 = male) |
-| `Chest pain type` | Type of chest pain (1–4) |
-| `FBS over 120` | Fasting blood sugar > 120 mg/dl (1 = true, 0 = false) |
-| `EKG results` | Resting electrocardiographic results (0, 1, 2) |
-| `Exercise angina` | Exercise-induced angina (1 = yes, 0 = no) |
-| `Slope of ST` | Slope of the peak exercise ST segment |
-| `Number of vessels fluro` | Number of major vessels coloured by fluoroscopy (0–3) |
-| `Thallium` | Thallium stress test result (3, 6, 7) |
-
----
-
-## 3. Project Structure
+## 2. Project Structure
 
 ```
 Heart-Disease-Prediction-Model/
 │
+├── model.py                  ← Full ML training pipeline
+├── app.py                    ← Flask web server
+├── heart_model.pkl           ← Lightweight saved model (root level)
+├── requirements.txt          ← Python packages needed
+│
 ├── data/
-│   ├── train.csv
-│   └── test.csv
+│   └── heart_statlog_cleveland_hungary_final.csv   ← Training dataset
 │
-├── heart_disease_refined.py       # Main training script
-├── heart_disease_model_docs.md    # This file
+├── outputs/                  ← All files generated by model.py
+│   ├── heart_disease_model.pkl     ← Main trained model (Random Forest)
+│   ├── feature_names.pkl           ← Feature names used for prediction
+│   ├── decision_tree_rules.txt     ← Text rules from Decision Tree
+│   ├── model_comparison_chart.png
+│   ├── roc_curve_comparison.png
+│   ├── confusion_matrix_*.png      ← One per model
+│   ├── feature_importance.png
+│   ├── correlation_heatmap.png
+│   ├── target_distribution.png
+│   ├── *_histogram.png             ← One per numeric column
+│   └── *_boxplot.png               ← One per numeric column
 │
-├── clean_dataset.csv              # Cleaned & scaled dataset (generated)
+├── static/
+│   ├── style.css             ← All CSS for the website
+│   └── heart_hero.png        ← Hero image shown on homepage
 │
-├── logistic_regression_model.pkl  # Saved model (generated)
-├── decision_tree_model.pkl        # Saved model (generated)
-├── random_forest_model.pkl        # Saved model (generated)
-├── xgboost_model.pkl              # Saved model (generated, if XGBoost installed)
-└── scaler.pkl                     # Saved StandardScaler (generated)
+└── templates/
+    ├── index.html            ← Main prediction form page
+    └── recommendations.html  ← Results & advice page
 ```
 
 ---
 
-## 4. Pipeline Overview
+## 3. Dependencies & Setup
 
+### requirements.txt
 ```
-Raw CSV Data
-     │
-     ▼
-Drop ID Column
-     │
-     ▼
-Impute Missing Values
-(Median → Numerical | Mode → Categorical)
-     │
-     ▼
-Encode Target: Absence→0, Presence→1
-     │
-     ▼
-Class Imbalance Check
-(Auto-apply class_weight='balanced' if ratio ≤ 0.7)
-     │
-     ▼
-StandardScaler (fit on train, transform both)
-     │
-     ▼
-Correlation Analysis → Top 5 Features
-     │
-     ▼
-Stratified Train/Validation Split (80/20)
-     │
-     ▼
-GridSearchCV (5-fold) per Model
-     │
-     ▼
-10-Fold Cross-Validation
-     │
-     ▼
-Confusion Matrix + Classification Report
-     │
-     ▼
-Model Comparison & Best Model Selection
+joblib
+flask
+pandas
+numpy
+scikit-learn
+matplotlib
 ```
 
----
-
-## 5. Data Preprocessing
-
-### 5.1 Dropping Irrelevant Columns
-
-The `id` column is dropped from both train and test sets if present, as it carries no predictive signal.
-
-### 5.2 Missing Value Imputation
-
-Missing values are imputed using statistics derived **from the training set only** to prevent data leakage into the test set.
-
-| Column Type | Strategy |
-|---|---|
-| Numerical | Replaced with **median** of training column |
-| Categorical | Replaced with **mode** of training column |
-
-### 5.3 Target Encoding
-
-```python
-train_df['Heart Disease'] = train_df['Heart Disease'].map({
-    'Absence': 0,
-    'Presence': 1
-})
-```
-
-### 5.4 Class Imbalance Detection
-
-The pipeline automatically checks whether the target is imbalanced:
-
-$\begin{equation}
-\text{balance\_ratio} = \frac{\text{min\_class\_count}}{\text{max\_class\_count}}
-\end{equation}$
-
-If $\text{ratio} \leq 0.70$, `class_weight='balanced'` is applied to all applicable models, and `scale_pos_weight` is set for XGBoost. This prevents the model from developing a lazy habit of always predicting the majority class.
-
-### 5.5 Feature Scaling
-
-All features are standardised using `StandardScaler` (zero mean, unit variance):
-
-```python
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X_train)
-```
-
-> ⚠️ The scaler is **fit on training data only** and then applied to validation/test data — no leakage here.
-
-### 5.6 Train/Validation Split
-
-```python
-X_train, X_val, y_train, y_val = train_test_split(
-    X_scaled, y, test_size=0.2, random_state=42, stratify=y
-)
-```
-
-`stratify=y` ensures both splits have the same class distribution — especially important for imbalanced datasets.
-
----
-
-## 6. Feature Engineering
-
-### Correlation Analysis
-
-After scaling, Pearson correlation is computed between all features and the target. The **top 5 most correlated features** (by absolute correlation) are identified and used for a parallel reduced-feature experiment.
-
-```python
-top_features = corr['Heart Disease'].abs().sort_values(ascending=False)[1:6]
-```
-
-### Feature Importance
-
-After training, Random Forest and XGBoost both expose `feature_importances_`, which are plotted as bar charts to explain which clinical variables drive predictions most.
-
----
-
-## 7. Models
-
-All models are trained using the `evaluate()` helper function which handles fitting, prediction, 10-fold cross-validation, metric computation, and confusion matrix display.
-
----
-
-### 7.1 Logistic Regression
-
-**What it is:** A linear probabilistic classifier that estimates the log-odds of heart disease presence.
-
-**Why use it:** Highly interpretable, fast to train, and a great baseline. Works especially well when the decision boundary is roughly linear.
-
-**Key parameters tuned:**
-
-| Parameter | Values Searched | Description |
-|---|---|---|
-| `C` | 0.01, 0.1, 1, 10, 100 | Inverse of regularisation strength — smaller = stronger regularisation |
-| `solver` | lbfgs, liblinear | Optimisation algorithm |
-| `penalty` | l2 | Regularisation type |
-
----
-
-### 7.2 Decision Tree
-
-**What it is:** A tree-based model that splits the feature space using a series of if/else rules learned from the training data.
-
-**Why use it:** Visually interpretable and captures non-linear relationships. However, prone to overfitting without depth constraints — which is why tuning `max_depth` is critical.
-
-**Key parameters tuned:**
-
-| Parameter | Values Searched | Description |
-|---|---|---|
-| `max_depth` | 3, 5, 7, 10, None | Maximum depth of the tree — prevents overfitting |
-| `min_samples_split` | 2, 5, 10, 20 | Minimum samples required to split a node |
-| `min_samples_leaf` | 1, 3, 5, 10 | Minimum samples required at a leaf node |
-| `criterion` | gini, entropy | Splitting quality measure |
-
-> ⚠️ Without `max_depth`, a Decision Tree will memorise the training set perfectly and generalise poorly. Always constrain it.
-
----
-
-### 7.3 Random Forest
-
-**What it is:** An ensemble of Decision Trees trained on random subsets of data and features, with predictions made by majority vote.
-
-**Why use it:** More robust than a single tree, handles non-linearity well, and naturally provides feature importance. Usually your safest bet for tabular data.
-
-**Key parameters tuned:**
-
-| Parameter | Values Searched | Description |
-|---|---|---|
-| `n_estimators` | 100, 200, 300 | Number of trees in the forest |
-| `max_depth` | None, 5, 10, 15 | Maximum depth per tree |
-| `min_samples_split` | 2, 5, 10 | Minimum samples to split a node |
-| `max_features` | sqrt, log2 | Number of features considered at each split |
-
-
----
-
-### 7.4 XGBoost
-
-**What it is:** A gradient-boosted ensemble that builds trees sequentially, with each tree correcting the errors of the previous one.
-
-**Why use it:** State-of-the-art on tabular data. Regularisation is built in, it handles missing values natively, and it typically achieves the highest accuracy of the four models.
-
-**Key parameters tuned:**
-
-| Parameter | Values Searched | Description |
-|---|---|---|
-| `n_estimators` | 100, 200, 300 | Number of boosting rounds |
-| `learning_rate` | 0.01, 0.05, 0.1 | Step size — lower = more conservative, less overfitting |
-| `max_depth` | 3, 5, 7 | Maximum depth per tree |
-| `subsample` | 0.8, 1.0 | Fraction of training samples per tree |
-
-**Class imbalance handling:** `scale_pos_weight = count(negative) / count(positive)`
-
-**Saved as:** `xgboost_model.pkl`
-
----
-
-## 8. Hyperparameter Tuning
-
-All models are tuned using `GridSearchCV` with 5-fold cross-validation:
-
-```python
-grid = GridSearchCV(
-    estimator,
-    param_grid,
-    cv=5,
-    scoring='accuracy',
-    n_jobs=-1          # Uses all CPU cores — goes brrr 🚀
-)
-grid.fit(X_train, y_train)
-best_model = grid.best_estimator_
-```
-
-After tuning, the best estimator is passed to `evaluate()` for final assessment on the validation set.
-
-> ⏱️ **Runtime note:** GridSearchCV across all four models can take 5–15 minutes depending on dataset size and machine specs. Consider using `RandomizedSearchCV` to speed things up if needed.
-
----
-
-## 9. Evaluation Metrics
-
-Each model is evaluated on the following metrics:
-
-| Metric | Formula | What It Tells You |
-|---|---|---|
-| **Accuracy** | $\frac{(TP + TN)}{Total}$ | Overall correctness — can be misleading if classes are imbalanced |
-| **Precision** | $\frac{TP}{(TP + FP)}$ | Of all predicted positives, how many were actually positive? |
-| **Recall** | $\frac{TP}{(TP + FN)}$ | Of all actual positives, how many did we catch? Critical in medical settings |
-| **F1-Score** | $2 \times \frac{(P \times R)}{(P + R)}$ | Harmonic mean of precision and recall — best single metric when classes are imbalanced |
-| **CV Mean** | Mean accuracy across 10 folds | Reliable estimate of generalisation performance |
-| **CV Std** | Std dev across 10 folds | Stability — lower is better |
-
-> 💡 **In medical diagnosis, Recall (Sensitivity) matters most.** A false negative (telling a sick patient they're healthy) is far more dangerous than a false positive.
-
-### Confusion Matrix
-
-```
-                 Predicted
-Actual         Absence      Presence
-Absence  [      TN       |      FP      ]
-Presence [      FN       |      TP      ]
-```
----
-
-## 10. Dependencies
-
-
-- pandas 🐼
-- numpy 🔢
-- matplotlib 📊
-- scikit-learn 🦏
-- xgboost ⚡
-- pickle 🔐
-
-
-Install all at once:
-
+### How to install:
 ```bash
-pip install pandas numpy matplotlib scikit-learn xgboost
+pip install -r requirements.txt
+```
+
+### Library Roles:
+| Library | Purpose |
+|---|---|
+| `pandas` | Load and manipulate the CSV dataset as a DataFrame |
+| `numpy` | Numerical operations (averages, arrays) |
+| `matplotlib` / `seaborn` | Generate charts and plots |
+| `scikit-learn` | All ML models, preprocessing, and evaluation tools |
+| `joblib` | Save and load trained models to/from `.pkl` files |
+| `flask` | Create the web server with HTTP routes |
+
+---
+
+## 4. The Dataset
+
+**File:** `data/heart_statlog_cleveland_hungary_final.csv`
+
+This dataset is a combined version of multiple heart disease datasets (Cleveland, Hungary, Statlog). It contains **clinical patient data** with a binary target column.
+
+### Features (Input Columns):
+
+| Column | Type | Description |
+|---|---|---|
+| `age` | Numeric | Patient age in years |
+| `sex` | Binary | 1 = Male, 0 = Female |
+| `chest pain type` | Categorical | 0=Typical Angina, 1=Atypical, 2=Non-Anginal, 3=Asymptomatic |
+| `resting bp s` | Numeric | Resting blood pressure (mmHg) |
+| `cholesterol` | Numeric | Serum cholesterol (mg/dl) |
+| `fasting blood sugar` | Binary | 1 = >120 mg/dl, 0 = ≤120 mg/dl |
+| `resting ecg` | Categorical | 0=Normal, 1=ST-T abnormality, 2=Left Ventricular Hypertrophy |
+| `max heart rate` | Numeric | Maximum heart rate during exercise |
+| `exercise angina` | Binary | 1 = Yes, 0 = No |
+| `oldpeak` | Numeric | ST depression from exercise vs rest |
+| `ST slope` | Categorical | 0=Upsloping, 1=Flat, 2=Downsloping |
+
+### Target (Output Column):
+
+| Value | Meaning |
+|---|---|
+| `0` | No Heart Disease |
+| `1` | Heart Disease Present |
+
+---
+
+## 5. Machine Learning Pipeline — model.py
+
+This script is the **complete ML training pipeline**. You run it once to train all models and generate all output files. It is divided into 23 numbered sections.
+
+---
+
+### 5.1 Imports
+
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import joblib
+import os
+import warnings
+
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import SimpleImputer
+from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV, cross_validate
+from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay, roc_curve, roc_auc_score
+from sklearn.tree import DecisionTreeClassifier, plot_tree, export_text
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+```
+
+`warnings.filterwarnings("ignore")` suppresses unimportant warning messages during training.
+
+---
+
+### 5.2 Exploratory Data Analysis (EDA)
+
+EDA means **understanding your data before training**. The script prints:
+
+- `df.shape` → number of rows & columns
+- `df.head()` → first 5 rows
+- `df.info()` → column types, non-null counts
+- `df.isnull().sum()` → count of missing values per column
+- `df.duplicated().sum()` → number of duplicate rows
+- `df["target"].value_counts()` → class balance (how many 0s vs 1s)
+
+Then it generates and saves multiple plots:
+
+| Plot | What it shows |
+|---|---|
+| Target Distribution | Bar chart: how many patients have disease vs not |
+| Correlation Heatmap | How correlated every feature is with each other |
+| Histograms | Distribution shape of each numeric column |
+| Boxplots | Spread and outliers in each numeric column |
+| Chest Pain vs Target | How each chest pain type relates to heart disease |
+| Sex vs Target | How gender relates to heart disease |
+
+---
+
+### 5.3 Feature Engineering
+
+The columns are split into three **groups** based on their data type:
+
+```python
+numeric_features = ["age", "resting bp s", "cholesterol", "max heart rate", "oldpeak"]
+
+categorical_features = ["chest pain type", "resting ecg", "ST slope"]
+
+binary_features = ["sex", "fasting blood sugar", "exercise angina"]
+```
+
+**Why does this matter?**
+Each group needs different preprocessing treatment:
+- Numeric → fill missing + scale
+- Categorical → fill missing + one-hot encode
+- Binary → pass through as-is (already 0 or 1)
+
+---
+
+### 5.4 Preprocessing Pipelines
+
+```python
+def build_preprocessor(scale=True):
+
+    num_pipe = Pipeline([
+        ("imputer", SimpleImputer(strategy="median")),
+        *([("scaler", StandardScaler())] if scale else [])
+    ])
+
+    cat_pipe = Pipeline([
+        ("imputer", SimpleImputer(strategy="most_frequent")),
+        ("onehot", OneHotEncoder(handle_unknown="ignore"))
+    ])
+
+    preprocessor = ColumnTransformer([
+        ("num", num_pipe, numeric_features),
+        ("cat", cat_pipe, categorical_features),
+        ("bin", "passthrough", binary_features)
+    ])
+
+    return preprocessor
+```
+
+#### Key Concepts:
+
+**`Pipeline`**
+Chains multiple steps together so they execute in order. Each step transforms the data and passes it to the next.
+
+**`SimpleImputer`**
+Fills in missing values automatically.
+- `strategy="median"` → replace missing numbers with the column's median value
+- `strategy="most_frequent"` → replace missing categories with the most common value
+
+**`StandardScaler`**
+Normalizes numeric data so all features have mean=0 and std=1. This prevents large-valued features (like cholesterol=250) from dominating over small-valued ones (like age=52). Used when `scale=True`.
+
+**`OneHotEncoder`**
+Converts categorical integers into binary columns. Example: `chest_pain_type=2` becomes `[0, 0, 1, 0]`. This is required because ML models work with numbers, not categories.
+- `handle_unknown="ignore"` → if an unseen category appears at prediction time, treat it as all zeros.
+
+**`ColumnTransformer`**
+Applies different pipelines to different column groups simultaneously and merges the result.
+
+**Why `scale=False` for tree models?**
+Decision Trees and Random Forests are **not distance-based** — they split on thresholds. Scaling doesn't affect their logic, so it's skipped.
+Logistic Regression and SVM **are** distance-based, so scaling is required.
+
+---
+
+### 5.5 Train/Test Split
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.2,
+    stratify=y,
+    random_state=42
+)
+```
+
+- **80%** of data used for training
+- **20%** reserved for testing (the model never sees this during training)
+- `stratify=y` ensures both splits have the same ratio of 0s to 1s (important for imbalanced datasets)
+- `random_state=42` makes the split reproducible every run
+
+---
+
+### 5.6 Cross Validation
+
+```python
+cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
+
+SCORING = ["accuracy", "precision", "recall", "f1", "roc_auc"]
+```
+
+**What is Cross Validation?**
+Instead of testing on one fixed test set, the data is split into 10 "folds". The model is trained on 9 folds and tested on the remaining 1, repeated 10 times. The final score is the **average** of all 10 runs.
+
+This gives a more reliable estimate of model performance.
+
+**`StratifiedKFold`**
+Same as KFold but maintains the class ratio in each fold.
+
+**Why are there 5 scoring metrics?**
+
+| Metric | What it measures |
+|---|---|
+| `accuracy` | % of all predictions that are correct |
+| `precision` | Of predicted positives, how many are truly positive |
+| `recall` | Of all actual positives, how many did the model catch |
+| `f1` | Harmonic mean of precision and recall |
+| `roc_auc` | Area under ROC curve — overall discriminative power |
+
+> **For medical diagnosis, Recall is the most important metric.** A false negative (telling a sick person they're healthy) is far more dangerous than a false positive.
+
+---
+
+### 5.7 Models Used
+
+Five different ML algorithms are compared:
+
+#### 1. Decision Tree
+```python
+DecisionTreeClassifier(random_state=42)
+```
+Makes decisions by splitting data into branches based on feature thresholds. Highly interpretable — you can read the exact rules. Best parameters found by GridSearchCV.
+
+#### 2. Random Forest
+```python
+RandomForestClassifier(n_estimators=300, random_state=42)
+```
+An **ensemble** of 300 Decision Trees. Each tree is trained on a random subset of data and features. The final prediction is the majority vote. More accurate and robust than a single Decision Tree.
+
+#### 3. Gradient Boosting
+```python
+GradientBoostingClassifier(random_state=42)
+```
+Builds trees **sequentially** — each new tree corrects the mistakes of the previous one. Very powerful but slower to train.
+
+#### 4. Logistic Regression
+```python
+LogisticRegression(max_iter=1000)
+```
+Despite the name, this is a **classification** algorithm. It models the probability of each class using a sigmoid function. Fast, interpretable, and works well with scaled data.
+
+#### 5. SVM (RBF Kernel)
+```python
+SVC(probability=True, kernel="rbf", random_state=42)
+```
+Support Vector Machine finds the optimal boundary (hyperplane) between classes. The RBF kernel handles non-linear separability. `probability=True` enables `predict_proba()`.
+
+---
+
+### 5.8 GridSearchCV (Hyperparameter Tuning)
+
+Hyperparameters are settings you choose **before** training — the model cannot learn them on its own. GridSearchCV finds the best combination by trying all possibilities.
+
+```python
+dt_param_grid = {
+    "model__max_depth": [3, 5, 7, None],
+    "model__min_samples_split": [2, 10, 20],
+    "model__criterion": ["gini", "entropy"],
+    "model__ccp_alpha": [0.0, 0.01, 0.05]
+}
+
+grid_search = GridSearchCV(
+    estimator=dt_pipe,
+    param_grid=dt_param_grid,
+    cv=cv,
+    scoring="recall",   # optimize for recall (medical priority)
+    n_jobs=-1           # use all CPU cores
+)
+```
+
+| Parameter | What it controls |
+|---|---|
+| `max_depth` | Maximum levels in the decision tree (prevents overfitting) |
+| `min_samples_split` | Minimum samples needed to split a node |
+| `criterion` | Split quality measure: gini impurity or information gain (entropy) |
+| `ccp_alpha` | Pruning strength — higher = simpler tree |
+
+**`n_jobs=-1`** means use all available CPU cores in parallel for speed.
+
+---
+
+### 5.9 Evaluation Metrics
+
+After training, each model is evaluated on the held-out test set:
+
+**Classification Report** — Printed for each model:
+```
+              precision  recall  f1-score  support
+  No Disease       0.xx    0.xx      0.xx      xxx
+     Disease       0.xx    0.xx      0.xx      xxx
+```
+
+**Confusion Matrix** — A 2×2 table:
+```
+                Predicted No Disease | Predicted Disease
+Actual No Disease:    TN (correct)   |   FP (wrong)
+Actual Disease:       FN (dangerous) |   TP (correct)
+```
+
+- **TN** = True Negative (correctly said "no disease")
+- **TP** = True Positive (correctly said "disease")
+- **FP** = False Positive (incorrectly alarmed a healthy person)
+- **FN** = False Negative (missed a sick person — most dangerous)
+
+**ROC Curve** — Plots True Positive Rate vs False Positive Rate at various thresholds. AUC (Area Under Curve) closer to 1.0 is better.
+
+---
+
+### 5.10 Visualizations & Outputs
+
+All charts are saved to `outputs/` at 300 DPI:
+
+| File | Generated by |
+|---|---|
+| `target_distribution.png` | sns.countplot on target column |
+| `correlation_heatmap.png` | sns.heatmap on df.corr() |
+| `age_histogram.png` etc. | sns.histplot per numeric column |
+| `age_boxplot.png` etc. | sns.boxplot per numeric column |
+| `chest_pain_vs_target.png` | sns.countplot with hue=target |
+| `sex_vs_target.png` | sns.countplot with hue=target |
+| `confusion_matrix_*.png` | ConfusionMatrixDisplay per model |
+| `roc_curve_comparison.png` | Multi-model ROC overlay |
+| `feature_importance.png` | Top 10 features from Random Forest |
+| `decision_tree_visualization.png` | plot_tree() visual |
+| `decision_tree_rules.txt` | export_text() readable rules |
+| `model_comparison_chart.png` | Bar chart all models vs all metrics |
+
+---
+
+### 5.11 Saving the Model
+
+```python
+# Save the trained Random Forest model
+joblib.dump(fitted_models["Random Forest"], "outputs/heart_disease_model.pkl")
+
+# Save feature names (needed to build correct DataFrame at prediction time)
+joblib.dump(feature_names, "outputs/feature_names.pkl")
+```
+
+**Why Random Forest was chosen as the production model:**
+- Highest or near-highest performance across all metrics
+- Robust to overfitting due to ensemble averaging
+- Handles missing values and feature interactions well
+
+**`joblib.dump` / `joblib.load`**
+Serializes a Python object to a file. More efficient than `pickle` for large NumPy arrays inside scikit-learn models.
+
+---
+
+## 6. Web Application — app.py
+
+Flask is a lightweight Python web framework. It receives HTTP requests and returns HTML pages or JSON responses.
+
+### 6.1 Flask Setup
+
+```python
+from flask import Flask, request, jsonify, render_template
+import joblib
+import pandas as pd
+
+app = Flask(__name__)
+model = joblib.load("outputs/heart_disease_model.pkl")
+```
+
+The model is loaded **once** at server startup, not on every request. This makes predictions fast.
+
+---
+
+### 6.2 Routes
+
+#### `GET /` — Home Page
+```python
+@app.route("/")
+def home():
+    return render_template("index.html")
+```
+Renders the main prediction form.
+
+---
+
+#### `POST /predict` — Run Prediction
+```python
+@app.route("/predict", methods=["POST"])
+def predict():
+    data = request.form.to_dict()        # Get form fields as dict
+    for key in data:
+        data[key] = float(data[key])     # Convert strings to numbers
+    df = pd.DataFrame([data])            # Wrap in single-row DataFrame
+    df = df.astype(float)
+
+    prediction = model.predict(df)[0]       # 0 or 1
+    probability = model.predict_proba(df)[0][1]  # probability of class 1
+
+    return jsonify({
+        "prediction": int(prediction),
+        "probability": float(probability)
+    })
+```
+
+**Why convert to DataFrame?**
+The model was trained on a Pandas DataFrame with specific column names. It expects the same structure at prediction time — a single-row DataFrame with the exact same columns.
+
+**`predict_proba(df)[0][1]`**
+- `[0]` → first (and only) row
+- `[1]` → probability of class 1 (disease present)
+
+Returns JSON like: `{"prediction": 1, "probability": 0.7842}`
+
+---
+
+#### `GET /recommendations` — Results Page
+```python
+@app.route("/recommendations")
+def recommendations():
+    probability = request.args.get("probability", 0, type=float)
+    prediction = request.args.get("prediction", 0, type=int)
+    name = request.args.get("name", "Patient", type=str)
+    ...
+    return render_template("recommendations.html", ...)
+```
+
+Reads values from the URL query string (e.g. `/recommendations?probability=0.75&prediction=1&name=John`) and passes them into the HTML template.
+
+---
+
+### 6.3 Risk Level Classification
+
+```python
+if probability < 0.30:
+    level = "low"
+elif probability < 0.60:
+    level = "mild"
+else:
+    level = "high"
+```
+
+| Probability Range | Risk Level |
+|---|---|
+| 0% – 29% | 🟢 Low |
+| 30% – 59% | 🟡 Mild |
+| 60% – 100% | 🔴 High |
+
+This `level` string is passed to the template to control which set of recommendations is shown.
+
+---
+
+## 7. Frontend — templates/
+
+Flask uses **Jinja2 templating** — HTML files with special `{{ }}` and `{% %}` syntax.
+
+### 7.1 index.html
+
+The main page with 4 key sections:
+
+#### Header
+Fixed navigation bar with the CardioCare logo and links to the Predict form and History table.
+
+#### Hero Section
+Large marketing banner with a headline, description, CTA button, and an animated floating image.
+
+#### Prediction Form
+A `<form id="form">` with 11 fields:
+
+| Field | HTML Element | Sent to Model |
+|---|---|---|
+| Full Name | `<input type="text">` | ❌ No (UI only) |
+| Age | `<input type="number">` | ✅ Yes |
+| Sex | `<select>` | ✅ Yes (1/0) |
+| Chest Pain Type | `<select>` | ✅ Yes (0–3) |
+| Resting Blood Pressure | `<input type="number">` | ✅ Yes |
+| Cholesterol | `<input type="number">` | ✅ Yes |
+| Fasting Blood Sugar | `<select>` | ✅ Yes (1/0) |
+| Resting ECG | `<select>` | ✅ Yes (0–2) |
+| Max Heart Rate | `<input type="number">` | ✅ Yes |
+| Exercise Angina | `<select>` | ✅ Yes (1/0) |
+| Oldpeak | `<input type="number">` | ✅ Yes |
+| ST Slope | `<select>` | ✅ Yes (0–2) |
+
+#### JavaScript Logic (inside `<script>`)
+
+**`showAlert(message)`**
+Displays a red popup notification at the top of the screen for 3 seconds.
+
+**`validateInput(input)`**
+Checks if a number field's value is within its `min`/`max` range. Adds a red border (`.error` class) if invalid.
+
+**`loadHistory()`**
+Reads from `localStorage` and renders the history table. No server involved — data stays in the user's browser.
+
+**Form Submit Handler (`onsubmit`)**
+1. Validates all fields
+2. Sends form data to `/predict` via `fetch()` (AJAX — no page reload)
+3. Saves the result to `localStorage` for history
+4. Redirects to `/recommendations?probability=...&prediction=...&name=...`
+
+---
+
+### 7.2 recommendations.html
+
+Uses Jinja2 conditionals to display different content based on risk level:
+
+```html
+{% if level == "low" %}
+  <div class="risk-banner risk-low"> ... </div>
+  <!-- 4 wellness tip cards -->
+
+{% elif level == "mild" %}
+  <div class="risk-banner risk-mild"> ... </div>
+  <!-- 6 lifestyle change cards -->
+
+{% else %}
+  <div class="risk-banner risk-high"> ... </div>
+  <!-- 6 urgent medical action cards -->
+{% endif %}
+```
+
+The probability is formatted using Jinja2's filter:
+```
+{{ "%.1f"|format(probability * 100) }}%
+```
+This converts `0.7842` → `"78.4%"`.
+
+---
+
+## 8. Styling — static/style.css
+
+### Design System
+
+The UI uses a **dark glassmorphism** design language:
+
+| Property | Value |
+|---|---|
+| Background | Animated gradient: `#0f172a` → `#1e1b4b` → `#312e81` |
+| Accent Color | Rose/red: `#fb7185`, `#e11d48` |
+| Text | `#f8fafc` (primary), `#94a3b8` (muted) |
+| Card Style | `rgba(30, 41, 59, 0.7)` + `backdrop-filter: blur(16px)` |
+| Font | `'Segoe UI', Roboto, Helvetica, Arial` |
+
+### Key Animations
+
+| Animation | Effect |
+|---|---|
+| `gradientShift` | Background slowly shifts color over 15s |
+| `float` | Hero image bobs up and down every 6s |
+| `slideRight` | Hero text slides in from the left on load |
+| `slideLeft` | Hero image slides in from the right on load |
+| `fadeSlideDown` | Risk banner on recommendations page |
+
+### Responsive Design
+
+```css
+@media (max-width: 900px) { /* Stack hero vertically on tablets */ }
+@media (max-width: 600px) { /* Compact form on mobile */ }
+```
+
+### Risk Badge Colors
+
+```css
+.badge-low  { background: rgba(34,197,94,0.2); color: #4ade80; }   /* green */
+.badge-mild { background: rgba(234,179,8,0.2); color: #fde047; }   /* yellow */
+.badge-high { background: rgba(239,68,68,0.2); color: #f87171; }   /* red */
 ```
 
 ---
+
+## 9. Output Files — outputs/
+
+| File | Description |
+|---|---|
+| `heart_disease_model.pkl` | Trained Random Forest pipeline (preprocessing + model) |
+| `feature_names.pkl` | List of feature names used during training |
+| `decision_tree_rules.txt` | Human-readable IF/THEN rules from Decision Tree |
+| `model_comparison_chart.png` | Bar chart comparing all models on all metrics |
+| `roc_curve_comparison.png` | ROC curves for all models on one chart |
+| `confusion_matrix_*.png` | Confusion matrix image per model |
+| `feature_importance.png` | Top 10 most important features (from Random Forest) |
+| `decision_tree_visualization.png` | Visual tree diagram (up to depth 4) |
+| `correlation_heatmap.png` | Heatmap of correlations between all features |
+| `target_distribution.png` | Class balance bar chart |
+| `*_histogram.png` | Distribution histogram per numeric feature |
+| `*_boxplot.png` | Boxplot showing spread/outliers per numeric feature |
+
+---
+
+## 10. Key Machine Learning Concepts Explained
+
+### What is Overfitting?
+When a model memorizes training data and fails to generalize to new data.
+- Signs: very high training accuracy, low test accuracy
+- Solutions: limit `max_depth`, use `ccp_alpha` pruning, use Random Forest (ensemble)
+
+### What is a Pipeline?
+A chain of data transformations followed by a model, all treated as one object. Benefits:
+- No data leakage (fitting scaler on test data)
+- Easy to save/load the entire workflow as one `.pkl` file
+- Cleaner, more reproducible code
+
+### What is Data Leakage?
+When information from the test set "leaks" into training. Example: fitting a scaler on the whole dataset before splitting. The Pipeline prevents this because `.fit()` is only called on training data.
+
+### Why OneHotEncoder?
+Most ML models require pure numbers. A feature like `chest_pain_type` with values 0,1,2,3 might mislead the model into thinking type 3 is "three times" type 1. One-hot encoding removes this false ordinal relationship by creating a separate binary column for each category.
+
+### What is Feature Importance?
+Random Forest calculates how much each feature reduces impurity across all trees. A higher importance means the feature has more influence on predictions.
+
+### What is AUC-ROC?
+- **ROC Curve**: plots True Positive Rate vs False Positive Rate at every possible decision threshold
+- **AUC**: area under that curve. 0.5 = random guessing, 1.0 = perfect classifier
+
+---
+
+## 11. How the Full System Works (End-to-End)
+
+```
+[User fills form] 
+        ↓
+[JavaScript validates inputs]
+        ↓
+[fetch() sends POST to /predict with FormData]
+        ↓
+[Flask receives form data, converts to DataFrame]
+        ↓
+[Random Forest Pipeline:
+   1. Impute missing values (median/mode)
+   2. Scale numeric features
+   3. One-hot encode categorical features
+   4. Forest of 300 trees vote on the outcome]
+        ↓
+[Returns JSON: { prediction: 1, probability: 0.78 }]
+        ↓
+[JavaScript saves to localStorage, redirects to /recommendations]
+        ↓
+[Flask /recommendations reads URL params, classifies risk level]
+        ↓
+[Jinja2 renders correct recommendations card set]
+        ↓
+[User sees personalized advice page]
+```
+
+---
+
+## 12. How to Run the Project
+
+### Step 1 — Train the model (only needed once)
+```bash
+python model.py
+```
+This runs the full training pipeline and saves everything to `outputs/`.
+
+### Step 2 — Start the web server
+```bash
+python app.py
+```
+
+### Step 3 — Open the browser
+```
+http://localhost:5000
+```
+
+### Notes:
+- The Flask server runs in debug mode (`debug=True`), so it auto-reloads when you edit `app.py`
+- The server listens on `host="0.0.0.0"` so it's accessible from other devices on your network at `http://YOUR_IP:5000`
+- Prediction history is stored in the browser's `localStorage` — it persists across page reloads but is device-specific
+
+---
+
+> ⚠️ **Disclaimer:** This tool is for educational purposes only. It is NOT a substitute for professional medical diagnosis. Always consult a qualified healthcare provider.
+
+---
+
+*Documentation generated for CardioCare — Heart Disease Prediction Project*
