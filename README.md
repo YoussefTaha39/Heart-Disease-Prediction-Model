@@ -3,7 +3,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10-blue)
 ![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Model-green)
-![Status](https://img.shields.io/badge/Status-In%20Progress-orange)
+![Status](https://img.shields.io/badge/Status-Completed-success)
 
 ---
 
@@ -37,6 +37,8 @@ To support **early detection and informed medical decision-making** through data
 - Logistic Regression
 - Decision Tree
 - Random Forest ⭐ *(Primary Model)*
+- Gradient Boosting
+- Support Vector Machine (SVM)
 
 ---
 
