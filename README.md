@@ -28,7 +28,7 @@ To support **early detection and informed medical decision-making** through data
 - 📊 Multiple ML models for performance comparison
 - 📈 Model evaluation using accuracy metrics
 - 💾 Model serialization with Pickle / Joblib
-- 🖥️ Interactive web interface using Streamlit
+- 🖥️ Interactive web interface 
 
 ---
 
@@ -50,7 +50,6 @@ To support **early detection and informed medical decision-making** through data
 - Scikit-learn
 - Matplotlib
 - Seaborn
-- Streamlit
 
 ---
 
