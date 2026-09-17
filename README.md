@@ -5,14 +5,13 @@
 ![Status](https://img.shields.io/badge/Status-Completed-success)
 
 ---
-<img width="1920" height="1110" alt="image" src="https://github.com/user-attachments/assets/b80b41bb-46e7-4fd5-937e-22afbb87e5ee" />
-
 
 ## 📌 Overview
 
 The **Heart Disease Prediction Model** is a completed Machine Learning project designed to predict the likelihood of heart disease using clinical and patient health data.
 
 The project combines **data preprocessing, exploratory analysis, model training, performance comparison, and web-based prediction** into an end-to-end Machine Learning application.
+<img width="1920" height="1110" alt="image" src="https://github.com/user-attachments/assets/b80b41bb-46e7-4fd5-937e-22afbb87e5ee" />
 
 > ⚠️ **Medical Disclaimer:** This project is intended for educational and research purposes only. It is not a substitute for professional medical diagnosis, clinical judgment, or treatment.
 
